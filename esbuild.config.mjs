@@ -15,11 +15,13 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["main.ts"],
+	entryPoints: ["src/main.ts"],
 	bundle: true,
 	external: [
 		"obsidian",
 		"electron",
+		// Optional runtime dep; we lazy-load it and keep it external
+		"webdav",
 		"@codemirror/autocomplete",
 		"@codemirror/collab",
 		"@codemirror/commands",
