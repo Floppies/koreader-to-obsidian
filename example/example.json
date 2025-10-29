@@ -1,0 +1,205 @@
+{
+  "entries": [
+    {
+      "text": "He was wrong. Very understandably so, since reality, even if it is inevitable, is not completely predictable; those who learn some correct detail about the life of another promptly jump from it to quite incorrect conclusions.",
+      "time": 1723464582,
+      "color": "yellow",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 22,
+      "chapter": "The Prisoner"
+    },
+    {
+      "text": "The things people joke about most are usually those which irritate them, but which they do not want to seem to be irritated by.",
+      "time": 1723464653,
+      "color": "orange",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 38,
+      "chapter": "The Prisoner"
+    },
+    {
+      "text": "Each great artist seems so different from all the others, and gives us such a strong sense of individuality, which we seek in vain in everyday life.",
+      "time": 1724727692,
+      "color": "blue",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 131,
+      "chapter": "The Prisoner"
+    },
+    {
+      "text": "But despite the richness of these works, I found myself thinking how strongly these works partake of the character of being incomplete.",
+      "time": 1724727752,
+      "color": "green",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 132,
+      "chapter": "The Prisoner"
+    },
+    {
+      "text": "The clock had stopped again, yet the room seemed louder for it. Time paused to listen.",
+      "time": 1725120000,
+      "color": "pink",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 27,
+      "chapter": "The Fugitive",
+      "note": "Possibly metaphorical reference to emotional stagnation."
+    },
+    {
+      "text": "When we name a thing, we give it shape, but not substance.",
+      "time": 1725189012,
+      "color": "cyan",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 44,
+      "chapter": "The Fugitive"
+    },
+    {
+      "text": "Some truths are too light to cast a shadow.",
+      "time": 1725189112,
+      "color": "purple",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 47,
+      "chapter": "The Fugitive",
+      "note": "This line reminds me of Wittgenstein's propositions."
+    },
+    {
+      "text": "Logic is merely the music of reason played in silence.",
+      "time": 1726000200,
+      "color": "blue",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 15,
+      "chapter": "Introduction",
+      "book": "Tractatus for Beginners",
+      "author": "Ludwig Bitgenstein"
+    },
+    {
+      "text": "To understand a sentence is to understand its place in the world.",
+      "time": 1726000300,
+      "color": "yellow",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 16,
+      "chapter": "Introduction",
+      "book": "Tractatus for Beginners",
+      "author": "Ludwig Bitgenstein"
+    },
+    {
+      "text": "The dogmatic world collapsed when the metaphors began to argue.",
+      "time": 1726011111,
+      "color": "green",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 89,
+      "chapter": "Logic Games",
+      "book": "Tractatus for Beginners",
+      "author": "Ludwig Bitgenstein",
+      "note": "Nonsense quote for testing nested annotation fields."
+    },
+    {
+      "text": "Beyond the river stood a city of mirrors, each reflecting a different dawn.",
+      "time": 1726122222,
+      "color": "red",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 203,
+      "chapter": "The Labyrinth of Dawn",
+      "book": "The Mirror Cities",
+      "author": "Italo Testone"
+    },
+    {
+      "text": "In the silence between footsteps lies the rhythm of eternity.",
+      "time": 1726201010,
+      "color": "blue",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 208,
+      "chapter": "The Labyrinth of Dawn",
+      "book": "The Mirror Cities",
+      "author": "Italo Testone"
+    },
+    {
+      "text": "Maybe the mirrors were only there so the city could see itself vanishing.",
+      "time": 1726303333,
+      "color": "yellow",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 211,
+      "chapter": "The Labyrinth of Dawn",
+      "book": "The Mirror Cities",
+      "author": "Italo Testone",
+      "note": "Annotated thought — testing mixed highlight types."
+    },
+    {
+      "text": "Every machine dreams of rust.",
+      "time": 1727000000,
+      "color": "orange",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 76,
+      "chapter": "Industrial Hymns",
+      "book": "The Rust Cathedral",
+      "author": "Ada Gearwright"
+    },
+    {
+      "text": "To build is to forget what once stood.",
+      "time": 1727000123,
+      "color": "green",
+      "sort": "highlight",
+      "drawer": "underscore",
+      "page": 80,
+      "chapter": "Industrial Hymns",
+      "book": "The Rust Cathedral",
+      "author": "Ada Gearwright"
+    },
+    {
+      "text": "The cathedral hums at night when no one prays to it anymore.",
+      "time": 1727000456,
+      "color": "pink",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 82,
+      "chapter": "Industrial Hymns",
+      "book": "The Rust Cathedral",
+      "author": "Ada Gearwright",
+      "note": "Used to test multi-book annotations and timestamps."
+    }
+  ],
+  "files": [
+    {
+      "file": "/storage/emulated/0/Books/In Search of Lost Time/(In Search of Lost Time (Prendergast Edition) - 05) Marcel Proust - The Prisoner and The Fugitive.epub",
+      "title": "The Prisoner and The Fugitive",
+      "created_on": 1725171976,
+      "version": "json/1.0.0",
+      "number_of_pages": 568,
+      "author": "Marcel Proust"
+    },
+    {
+      "file": "/storage/emulated/0/Books/Tractatus for Beginners - Ludwig Bitgenstein.epub",
+      "title": "Tractatus for Beginners",
+      "created_on": 1725999999,
+      "version": "json/1.0.0",
+      "number_of_pages": 144,
+      "author": "Ludwig Bitgenstein"
+    },
+    {
+      "file": "/storage/emulated/0/Books/The Mirror Cities - Italo Testone.epub",
+      "title": "The Mirror Cities",
+      "created_on": 1726120000,
+      "version": "json/1.0.0",
+      "number_of_pages": 310,
+      "author": "Italo Testone"
+    },
+    {
+      "file": "/storage/emulated/0/Books/The Rust Cathedral - Ada Gearwright.epub",
+      "title": "The Rust Cathedral",
+      "created_on": 1727000000,
+      "version": "json/1.0.0",
+      "number_of_pages": 220,
+      "author": "Ada Gearwright"
+    }
+  ]
+}
