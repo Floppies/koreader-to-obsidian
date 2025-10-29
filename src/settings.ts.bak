@@ -1,0 +1,159 @@
+import { App, PluginSettingTab, Setting, TextComponent, ButtonComponent } from "obsidian";
+import KOReaderPlugin from "./main";
+
+export interface KOReaderSyncSettings {
+  sourceType: "local" | "webdav";
+  sourceFolder: string;
+  webdav?: { url: string; username: string; password: string; basePath: string };
+
+  targetFolder: string;
+  oneNotePerBook: boolean;
+
+  // NEW: color -> tags map. e.g. { yellow: ["hl/idea"], blue: ["hl/ref"] }
+  colorMap: Record<string, string[]>;
+
+  // Optional global toggle
+  applyColorTags: boolean;
+}
+
+export const DEFAULT_SETTINGS: KOReaderSyncSettings = {
+  sourceType: "local",
+  sourceFolder: "/Volumes/KOBO/koreader/clipboard",
+  webdav: { url: "", username: "", password: "", basePath: "/koreader/clipboard" },
+
+  targetFolder: "Reading/Highlights",
+  oneNotePerBook: true,
+
+  colorMap: {
+    yellow: ["hl/insight"],
+    blue:   ["hl/reference"],
+    pink:   ["hl/quote"],
+    green:  ["hl/todo"]
+  },
+  applyColorTags: true
+};
+
+export class KOSyncSettingTab extends PluginSettingTab {
+  plugin: KOReaderPlugin;
+  constructor(app: App, plugin: KOReaderPlugin) { super(app, plugin); this.plugin = plugin; }
+
+  display(): void {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    containerEl.createEl("h2", { text: "KO-Sync Settings" });
+
+    // … (other settings: source, target, oneNotePerBook) …
+
+    // Toggle: apply color tags
+    new Setting(containerEl)
+      .setName("Apply color → tags")
+      .setDesc("When enabled, each highlight receives tags based on its KOReader color.")
+      .addToggle(t => t
+        .setValue(this.plugin.settings.applyColorTags)
+        .onChange(async v => { this.plugin.settings.applyColorTags = v; await this.plugin.saveSettings(); }));
+
+    // Color map header
+    containerEl.createEl("h3", { text: "Color → Tags map" });
+    const table = containerEl.createEl("div", { cls: "ko-color-table" });
+
+    // Render existing rows
+    const renderRows = () => {
+      table.empty();
+
+      // Header row
+      const header = table.createEl("div", { cls: "ko-row ko-header" });
+      header.createEl("div", { text: "Color (name)", cls: "ko-cell ko-col-color" });
+      header.createEl("div", { text: "Tags (comma-separated)", cls: "ko-cell ko-col-tags" });
+      header.createEl("div", { text: "", cls: "ko-cell ko-col-actions" });
+
+      const entries = Object.entries(this.plugin.settings.colorMap);
+
+      entries.forEach(([color, tags]) => {
+        const row = table.createEl("div", { cls: "ko-row" });
+
+        // Color cell
+        const colorCell = row.createEl("div", { cls: "ko-cell ko-col-color" });
+        const colorInput = new TextComponent(colorCell);
+        colorInput.setPlaceholder("yellow");
+        colorInput.setValue(color);
+
+        // Tags cell
+        const tagsCell = row.createEl("div", { cls: "ko-cell ko-col-tags" });
+        const tagsInput = new TextComponent(tagsCell);
+        tagsInput.setPlaceholder("hl/idea, reading, quote");
+        tagsInput.setValue(tags.join(", "));
+
+        // Actions
+        const actions = row.createEl("div", { cls: "ko-cell ko-col-actions" });
+        new ButtonComponent(actions)
+          .setButtonText("Save")
+          .onClick(async () => {
+            const newColor = colorInput.getValue().trim().toLowerCase();
+            const list = tagsInput.getValue()
+              .split(",")
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            if (!newColor) return;
+
+            // Update map atomically
+            const map = { ...this.plugin.settings.colorMap };
+            // If color name changed, delete old key
+            if (newColor !== color) delete map[color];
+            map[newColor] = Array.from(new Set(list));
+            this.plugin.settings.colorMap = map;
+            await this.plugin.saveSettings();
+            renderRows();
+          });
+
+        new ButtonComponent(actions)
+          .setButtonText("Delete")
+          .setCta()
+          .onClick(async () => {
+            const map = { ...this.plugin.settings.colorMap };
+            delete map[color];
+            this.plugin.settings.colorMap = map;
+            await this.plugin.saveSettings();
+            renderRows();
+          });
+      });
+
+      // Add new row
+      const addRow = table.createEl("div", { cls: "ko-row" });
+      const addColorCell = addRow.createEl("div", { cls: "ko-cell ko-col-color" });
+      const addColorInput = new TextComponent(addColorCell).setPlaceholder("new color…");
+
+      const addTagsCell = addRow.createEl("div", { cls: "ko-cell ko-col-tags" });
+      const addTagsInput = new TextComponent(addTagsCell).setPlaceholder("tag1, tag2");
+
+      const addActions = addRow.createEl("div", { cls: "ko-cell ko-col-actions" });
+      new ButtonComponent(addActions)
+        .setButtonText("Add")
+        .onClick(async () => {
+          const c = addColorInput.getValue().trim().toLowerCase();
+          const list = addTagsInput.getValue().split(",").map(s => s.trim()).filter(Boolean);
+          if (!c || list.length === 0) return;
+          const map = { ...this.plugin.settings.colorMap };
+          map[c] = Array.from(new Set([...(map[c] ?? []), ...list]));
+          this.plugin.settings.colorMap = map;
+          await this.plugin.saveSettings();
+          addColorInput.setValue("");
+          addTagsInput.setValue("");
+          renderRows();
+        });
+    };
+
+    renderRows();
+
+    // Minimal CSS (optional)
+    const style = document.createElement("style");
+    style.textContent = `
+      .ko-color-table { display: grid; gap: 6px; }
+      .ko-row { display: grid; grid-template-columns: 180px 1fr 160px; gap: 8px; align-items: center; }
+      .ko-header { font-weight: 600; opacity: .8; }
+      .ko-cell input { width: 100%; }
+    `;
+    containerEl.appendChild(style);
+  }
+}
