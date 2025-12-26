@@ -1,10 +1,9 @@
-import { App, PluginSettingTab, Setting, TextComponent, ButtonComponent, DropdownComponent, ToggleComponent } from "obsidian";
+import { App, PluginSettingTab, Setting, TextComponent, ButtonComponent, ToggleComponent, DropdownComponent } from "obsidian";
 import KOReaderSyncPlugin from "./main";
 
 export interface KOReaderSyncSettings {
-  sourceType: "local" | "webdav";
+  sourceType: "local";
   sourceFolder: string;
-  webdav?: { url: string; username: string; password: string; basePath: string };
 
   targetFolder: string;
   oneNotePerBook: boolean;
@@ -17,7 +16,6 @@ export interface KOReaderSyncSettings {
 export const DEFAULT_SETTINGS: KOReaderSyncSettings = {
   sourceType: "local",
   sourceFolder: "/Volumes/KOBO/koreader/clipboard",
-  webdav: { url: "", username: "", password: "", basePath: "/koreader/clipboard" },
 
   targetFolder: "Reading/Highlights",
   oneNotePerBook: true,
@@ -42,25 +40,8 @@ export class KOSyncSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "KOReader Sync" });
 
-    // Source type
+    // Local folder
     new Setting(containerEl)
-      .setName("Source type")
-      .setDesc("Where to read KOReader JSON files from.")
-      .addDropdown((dd: DropdownComponent) => {
-        dd.addOption("local", "Local folder");
-        dd.addOption("webdav", "WebDAV");
-        dd.setValue(this.plugin.settings.sourceType);
-        dd.onChange(async (v) => {
-          this.plugin.settings.sourceType = v as any;
-          await this.plugin.saveSettings();
-          this.display();
-        });
-      });
-
-    // Local folder (visible when sourceType = local)
-    const localWrap = containerEl.createDiv();
-    localWrap.toggle(this.plugin.settings.sourceType === "local");
-    new Setting(localWrap)
       .setName("Local source folder")
       .setDesc("Absolute path to KOReader JSON exports (e.g., clipboard folder).")
       .addText((t: TextComponent) => {
@@ -71,27 +52,6 @@ export class KOSyncSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
-
-    // WebDAV settings (visible when sourceType = webdav)
-    const wdWrap = containerEl.createDiv();
-    wdWrap.toggle(this.plugin.settings.sourceType === "webdav");
-    new Setting(wdWrap)
-      .setName("WebDAV URL")
-      .addText((t) => t.setPlaceholder("https://example.com/remote.php/dav/files/you/")
-        .setValue(this.plugin.settings.webdav?.url ?? "")
-        .onChange(async (v) => { this.ensureWebDAV(); this.plugin.settings.webdav!.url = v; await this.plugin.saveSettings(); }));
-    new Setting(wdWrap)
-      .setName("Username")
-      .addText((t) => t.setValue(this.plugin.settings.webdav?.username ?? "")
-        .onChange(async (v) => { this.ensureWebDAV(); this.plugin.settings.webdav!.username = v; await this.plugin.saveSettings(); }));
-    new Setting(wdWrap)
-      .setName("Password")
-      .addText((t) => { t.inputEl.type = "password"; t.setValue(this.plugin.settings.webdav?.password ?? "").onChange(async (v) => { this.ensureWebDAV(); this.plugin.settings.webdav!.password = v; await this.plugin.saveSettings(); }); });
-    new Setting(wdWrap)
-      .setName("Base path")
-      .setDesc("Remote directory containing JSON exports (e.g., /koreader/clipboard)")
-      .addText((t) => t.setValue(this.plugin.settings.webdav?.basePath ?? "")
-        .onChange(async (v) => { this.ensureWebDAV(); this.plugin.settings.webdav!.basePath = v; await this.plugin.saveSettings(); }));
 
     // Target folder in vault
     new Setting(containerEl)
@@ -114,8 +74,8 @@ export class KOSyncSettingTab extends PluginSettingTab {
         dd.addOption("page", "Page");
         dd.addOption("time", "Time");
         dd.setValue(this.plugin.settings.orderHighlightsBy);
-        dd.onChange(async (v) => {
-          this.plugin.settings.orderHighlightsBy = v as any;
+        dd.onChange(async (v: string) => {
+          this.plugin.settings.orderHighlightsBy = v as "page" | "time";
           await this.plugin.saveSettings();
         });
       });
@@ -216,11 +176,5 @@ export class KOSyncSettingTab extends PluginSettingTab {
       .ko-cell input { width: 100%; }
     `;
     containerEl.appendChild(style);
-  }
-
-  private ensureWebDAV() {
-    if (!this.plugin.settings.webdav) {
-      this.plugin.settings.webdav = { url: "", username: "", password: "", basePath: "/" };
-    }
   }
 }

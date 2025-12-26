@@ -14,7 +14,7 @@ export type ImportSummary = {
   updated: number;
   skipped: number;
   errors: number;
-  source: "local" | "webdav" | "usb";
+  source: "local";
   details: Array<{
     file: string; // vault-relative markdown path
     status: "created" | "updated" | "skipped" | "error";
@@ -45,14 +45,14 @@ export async function importAll(
           const enriched = enrichBook(b, settings);
           const ordered = orderHighlights(enriched, settings.orderHighlightsBy);
           const outName = fileNameForBook(settings, ordered);
-          const md = renderMarkdownForBook(ordered, settings, s.remotePath ?? s.localPath ?? "");
+          const md = renderMarkdownForBook(ordered, settings, s.localPath ?? "");
 
           const status = await createOrUpdate(app, outName, md, opts.dryRun);
           summary[status] += 1 as any; // increments created/updated/skipped
           summary.details.push({
             file: outName,
             status,
-            srcJson: s.remotePath ?? s.localPath ?? undefined,
+            srcJson: s.localPath ?? undefined,
             reason: status === "skipped" ? "No changes" : undefined
           });
         }
@@ -359,27 +359,13 @@ async function ensureFolder(app: App, fullPath: string) {
 
 // ---------- Sources (Local / WebDAV) ----------
 
-type JsonSource = { localPath?: string; remotePath?: string; kind: "local" | "webdav" };
+type JsonSource = { localPath: string; kind: "local" };
 
 async function listJsonSources(settings: KOReaderSyncSettings): Promise<JsonSource[]> {
-  if (settings.sourceType === "local") {
-    const entries = await fs.readdir(settings.sourceFolder, { withFileTypes: true });
-    return entries
-      .filter(e => e.isFile() && e.name.endsWith(".json"))
-      .map(e => ({ localPath: path.join(settings.sourceFolder, e.name), kind: "local" as const }));
-  }
-
-  if (settings.sourceType === "webdav") {
-    const client = await getWebDAV(settings);
-    const base = settings.webdav?.basePath || "/";
-    const entries = await client.getDirectoryContents(base);
-    return (entries as any[])
-      .filter(e => e.type === "file" && e.basename?.endsWith(".json"))
-      .map(e => ({ remotePath: posixJoin(base, e.basename), kind: "webdav" as const }));
-  }
-
-  // Future: "usb" could be treated as local with a mount path
-  return [];
+  const entries = await fs.readdir(settings.sourceFolder, { withFileTypes: true });
+  return entries
+    .filter(e => e.isFile() && e.name.endsWith(".json"))
+    .map(e => ({ localPath: path.join(settings.sourceFolder, e.name), kind: "local" as const }));
 }
 
 async function readKOReaderJson(settings: KOReaderSyncSettings, src: JsonSource): Promise<KOJson> {
@@ -387,26 +373,7 @@ async function readKOReaderJson(settings: KOReaderSyncSettings, src: JsonSource)
     const raw = await fs.readFile(src.localPath, "utf8");
     return JSON.parse(raw);
   }
-  if (src.kind === "webdav" && src.remotePath) {
-    const client = await getWebDAV(settings);
-    const raw = await client.getFileContents(src.remotePath, { format: "text" });
-    return JSON.parse(raw as string);
-  }
   throw new Error("Unsupported source");
-}
-
-type WebDAVClient = any;
-let _dav: WebDAVClient | null = null;
-async function getWebDAV(settings: KOReaderSyncSettings): Promise<WebDAVClient> {
-  if (_dav) return _dav;
-  const url = settings.webdav?.url ?? "";
-  const username = settings.webdav?.username ?? "";
-  const password = settings.webdav?.password ?? "";
-  if (!url || !username) throw new Error("WebDAV not configured");
-  const mod: any = await import("webdav");
-  const createClient = mod.createClient as (u: string, opts: { username: string; password: string }) => WebDAVClient;
-  _dav = createClient(url, { username, password });
-  return _dav;
 }
 
 // ---------- Utils ----------
