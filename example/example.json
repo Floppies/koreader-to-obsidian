@@ -134,6 +134,18 @@
       "note": "Annotated thought — testing mixed highlight types."
     },
     {
+      "text": "The cathedral humdsfsdfdsfsdf dsfsdfsdprays to it anymore.",
+      "time": 1727000456,
+      "color": "pink",
+      "sort": "annotation",
+      "drawer": "comment",
+      "page": 182,
+      "chapter": "Industrial Hymns",
+      "book": "The Rust Cathedral",
+      "author": "Ada Gearwright",
+      "note": "Used to test multi-book annotations and timestamps [[dsadasd]]."
+    },
+    {
       "text": "Every machine dreams of rust.",
       "time": 1727000000,
       "color": "orange",

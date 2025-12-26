@@ -10,6 +10,7 @@ type HighlightIn = {
   page?: number;
   location?: string;
   created?: string;
+  chapter?: string;
   // Enriched fields (optional)
   _id?: string;
   _color?: string | null;
@@ -67,13 +68,25 @@ export function renderBookMarkdown(input: RenderInput): string {
 /* -------------------- Highlight block -------------------- */
 
 function renderHighlightBlock(h: HighlightIn, index: number): string {
-  const label = h._color ? ` - ${h._color}` : "";
+   // Show color in metadata, not in the heading
+  const label = "";
+  const tagString = h._colorTags?.length
+    ? h._colorTags.map((t) => t.replace(/^#/, "")).map((t) => `#${t}`).join(" ")
+    : null;
+
+  const pageChapter =
+    h.page != null
+      ? `p.${h.page}${h.chapter ? `, chapter: "${safeInline(h.chapter)}"` : ""}`
+      : h.chapter
+      ? `chapter: "${safeInline(h.chapter)}"`
+      : null;
+
   const metaBits = [
-    h.page != null ? `p.${h.page}` : null,
+    pageChapter,
     h.location ? `loc ${h.location}` : null,
     h.created ? isoDate(h.created) : null,
     h._color ? `color:${h._color}` : null,
-    h._colorTags?.length ? `tags:${h._colorTags.join(",")}` : null,
+    tagString,
   ]
     .filter(Boolean)
     .join(" | ");
@@ -194,4 +207,3 @@ function dedupeSort(arr: string[]): string[] {
     a.localeCompare(b, undefined, { sensitivity: "base" })
   );
 }
-

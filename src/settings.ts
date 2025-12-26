@@ -8,6 +8,7 @@ export interface KOReaderSyncSettings {
 
   targetFolder: string;
   oneNotePerBook: boolean;
+  orderHighlightsBy: "page" | "time";
 
   colorMap: Record<string, string[]>;
   applyColorTags: boolean;
@@ -20,6 +21,7 @@ export const DEFAULT_SETTINGS: KOReaderSyncSettings = {
 
   targetFolder: "Reading/Highlights",
   oneNotePerBook: true,
+  orderHighlightsBy: "page",
 
   colorMap: {
     yellow: ["hl/insight"],
@@ -104,6 +106,24 @@ export class KOSyncSettingTab extends PluginSettingTab {
       .setName("One note per book")
       .addToggle((tg: ToggleComponent) => tg.setValue(this.plugin.settings.oneNotePerBook)
         .onChange(async (v) => { this.plugin.settings.oneNotePerBook = v; await this.plugin.saveSettings(); }));
+
+    new Setting(containerEl)
+      .setName("Highlight order")
+      .setDesc("Sort highlights by page number or by creation time.")
+      .addDropdown((dd: DropdownComponent) => {
+        dd.addOption("page", "Page");
+        dd.addOption("time", "Time");
+        dd.setValue(this.plugin.settings.orderHighlightsBy);
+        dd.onChange(async (v) => {
+          this.plugin.settings.orderHighlightsBy = v as any;
+          await this.plugin.saveSettings();
+        });
+      });
+    // Warning: changing order requires re-import
+    containerEl.createEl("div", {
+      cls: "mod-warning",
+      text: "After changing highlight order, run the import again to regenerate notes with the new ordering."
+    });
 
     new Setting(containerEl)
       .setName("Apply color → tags")
@@ -204,4 +224,3 @@ export class KOSyncSettingTab extends PluginSettingTab {
     }
   }
 }
-

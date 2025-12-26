@@ -43,8 +43,9 @@ export async function importAll(
 
         for (const b of books) {
           const enriched = enrichBook(b, settings);
-          const outName = fileNameForBook(settings, enriched);
-          const md = renderMarkdownForBook(enriched, settings, s.remotePath ?? s.localPath ?? "");
+          const ordered = orderHighlights(enriched, settings.orderHighlightsBy);
+          const outName = fileNameForBook(settings, ordered);
+          const md = renderMarkdownForBook(ordered, settings, s.remotePath ?? s.localPath ?? "");
 
           const status = await createOrUpdate(app, outName, md, opts.dryRun);
           summary[status] += 1 as any; // increments created/updated/skipped
@@ -87,6 +88,7 @@ type KOHighlight = {
   page?: number;
   location?: string; // normalized to string
   created?: string;
+  chapter?: string;
 };
 
 type KOJson = {
@@ -145,10 +147,11 @@ function normalizeKOReaderJsonMany(raw: KOJson): KOBook[] {
       text: h.text ?? "",
       note: h.note,
       color: h.color,
-      page: h.page,
-      location: typeof (h as any).location === "number" ? String((h as any).location) : ((h as any).location ?? ""),
-      created: h.created,
-    }));
+    page: h.page,
+    chapter: (h as any).chapter,
+    location: typeof (h as any).location === "number" ? String((h as any).location) : ((h as any).location ?? ""),
+    created: h.created,
+  }));
 
     const withIds = highlights.map((h) => ({
       ...h,
@@ -195,6 +198,7 @@ function normalizeKOReaderJsonMany(raw: KOJson): KOBook[] {
         color: e.color,
         page: e.page,
         location: typeof e.location === "number" ? String(e.location) : (e.location ?? ""),
+        chapter: e.chapter,
         created: typeof e.time === "number" ? new Date(e.time * 1000).toISOString() : undefined,
       }));
 
@@ -235,6 +239,40 @@ function enrichBook(book: KOBook, settings: KOReaderSyncSettings): KOBook {
     };
   }
   return enriched;
+}
+
+function orderHighlights(book: KOBook, mode: "page" | "time"): KOBook {
+  const withIndex = book.highlights.map((h, idx) => ({ h, idx }));
+
+  const parsePage = (h: KOHighlight) => (typeof h.page === "number" ? h.page : Number.POSITIVE_INFINITY);
+  const parseTime = (h: KOHighlight) => {
+    if (h.created) {
+      const t = new Date(h.created).getTime();
+      if (!Number.isNaN(t)) return t;
+    }
+    return Number.POSITIVE_INFINITY;
+  };
+
+  withIndex.sort((a, b) => {
+    if (mode === "page") {
+      const pa = parsePage(a.h);
+      const pb = parsePage(b.h);
+      if (pa !== pb) return pa - pb;
+      const ta = parseTime(a.h);
+      const tb = parseTime(b.h);
+      if (ta !== tb) return ta - tb;
+    } else {
+      const ta = parseTime(a.h);
+      const tb = parseTime(b.h);
+      if (ta !== tb) return ta - tb;
+      const pa = parsePage(a.h);
+      const pb = parsePage(b.h);
+      if (pa !== pb) return pa - pb;
+    }
+    return a.idx - b.idx; // stable tie-breaker
+  });
+
+  return { ...book, highlights: withIndex.map((x) => x.h) };
 }
 
 // ---------- Rendering ----------
